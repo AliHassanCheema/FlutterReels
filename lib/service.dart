@@ -1,14 +1,19 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 
-class ReelService {
-  List<String> _reels = [];
+import 'config.dart';
 
-  Future<List<String>> getVideosFromApI() async {
+class ReelService {
+  List<String> reels = [];
+
+  Future<List<String>> getVideosFromApI(int page) async {
     try {
       final response = await http.get(
-        Uri.parse('https://api.pexels.com/videos/popular?per_page=40'),
+        Uri.parse(
+            'https://api.pexels.com/videos/popular?per_page=20&page=$page'),
         headers: {
           'Authorization':
               'VdaQqOvvGYsJnanNW163T6npK5q6TJC8fWvmOv8Pn7oGditD4qREqg3A'
@@ -22,35 +27,34 @@ class ReelService {
               ['link']; // Assuming you want the first video file link
         }).toList();
 
-        _reels = urls;
+        reels.addAll(urls);
       } else {
         print('Request failed with status: ${response.statusCode}');
       }
     } catch (error) {
       print('Error fetching data: $error');
     }
-    for (var i = 0; i < _reels.length; i++) {
-      cacheVideos(_reels[i], i);
+    for (var i = 0; i < reels.length; i++) {
+      cacheVideos(reels[i], i);
       // you can add multiple logic for to cache videos. Right now I'm caching all videos
     }
-    return _reels;
+    return reels;
   }
 
   cacheVideos(String url, int i) async {
-    // FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+    FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+    debugPrint(
+        '================================= File info: ${fileInfo?.file.dirname}');
   }
 
-  Future<List<String>> getReels() async {
-    // _reels = [
-    //   'https://assets.mixkit.co/videos/preview/mixkit-mother-with-her-little-daughter-eating-a-marshmallow-in-nature-39764-large.mp4',
-    //   'https://assets.mixkit.co/videos/preview/mixkit-mother-with-her-little-daughter-eating-a-marshmallow-in-nature-39765-large.mp4',
-    //   'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
-    //   // 'https://assets.mixkit.co/videos/preview/mixkit-frying-diced-bacon-in-a-skillet-43063-large.mp4',
-    //   // 'https://assets.mixkit.co/videos/preview/mixkit-fresh-apples-in-a-row-on-a-natural-background-42946-large.mp4',
-    //   // 'https://assets.mixkit.co/videos/preview/mixkit-rain-falling-on-the-water-of-a-lake-seen-up-18312-large.mp4',
-    //   "https://videos.pexels.com/video-files/1526909/1526909-hd_1920_1080_24fps.mp4"
-    // ];
-    await getVideosFromApI();
-    return _reels;
+  Future<List<String>> getReels(int page) async {
+    reels.addAll([
+      'https://assets.mixkit.co/videos/preview/mixkit-mother-with-her-little-daughter-eating-a-marshmallow-in-nature-39764-large.mp4',
+      'https://assets.mixkit.co/videos/preview/mixkit-mother-with-her-little-daughter-eating-a-marshmallow-in-nature-39765-large.mp4',
+      'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
+      "https://videos.pexels.com/video-files/1526909/1526909-hd_1920_1080_24fps.mp4"
+    ]);
+    await getVideosFromApI(page);
+    return reels;
   }
 }
