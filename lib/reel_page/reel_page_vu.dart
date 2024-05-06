@@ -1,12 +1,18 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 
 import 'reel_video_player.dart';
 
 class VideoReelPage extends StatefulWidget {
-  const VideoReelPage({super.key, required this.reels, required this.index});
+  const VideoReelPage(
+      {super.key,
+      required this.index,
+      required this.reels,
+      required this.reelActions});
+  final Map<String, int> index;
   final List<String> reels;
-
-  final int index;
+  final List<Widget> reelActions;
 
   @override
   VideoReelPageState createState() => VideoReelPageState();
@@ -19,7 +25,7 @@ class VideoReelPageState extends State<VideoReelPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.index);
+    _pageController = PageController(initialPage: widget.index['index']!);
   }
 
   @override
@@ -37,41 +43,14 @@ class VideoReelPageState extends State<VideoReelPage> {
         controller: _pageController,
         itemCount: widget.reels.length,
         onPageChanged: (index) {
+          widget.index['index'] = index;
           currentPage = index;
         },
         itemBuilder: (context, index) {
           return VideoPlayerWidget(
-            key: Key(widget.reels[index]),
-            reelUrl: widget.reels[index],
-            reelActions: [
-              GestureDetector(
-                onTap: () {
-                  debugPrint('>>>>>>>>>>>>>>>>>>>>>>>> $index tapped');
-                },
-                child: const Icon(
-                  Icons.ac_unit_sharp,
-                  color: Colors.green,
-                  size: 36,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Icon(
-                Icons.ac_unit_sharp,
-                color: Colors.green,
-                size: 36,
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Icon(
-                Icons.ac_unit_sharp,
-                color: Colors.green,
-                size: 36,
-              )
-            ],
-          );
+              key: Key(widget.reels[index]),
+              reelUrl: widget.reels[index],
+              reelActions: widget.reelActions);
         },
       ),
     );

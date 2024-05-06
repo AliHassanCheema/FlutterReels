@@ -57,12 +57,41 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
   }
 
   onGetreels() async {
+    Map<String, int> index = {'index': 0};
     final reels = await ReelService()
         .getReels(controller.text == '' ? 8 : int.parse(controller.text));
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return VideoReelPage(
-        index: 0, // if you want to go to any specific index
+        index: index,
         reels: reels,
+        reelActions: [
+          GestureDetector(
+              onTap: () {
+                debugPrint(
+                    '===============================${index['index']} Tapped');
+              },
+              child: const Icon(
+                Icons.thumb_up,
+                color: Colors.white,
+                size: 36,
+              )),
+          const SizedBox(
+            height: 28,
+          ),
+          const Icon(
+            Icons.comment,
+            color: Colors.white,
+            size: 36,
+          ),
+          const SizedBox(
+            height: 28,
+          ),
+          const Icon(
+            Icons.share_sharp,
+            color: Colors.white,
+            size: 36,
+          ),
+        ],
       );
     }));
   }

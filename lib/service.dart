@@ -23,8 +23,7 @@ class ReelService {
         final Map<String, dynamic> responseData = json.decode(response.body);
         final List<dynamic> videos = responseData['videos'];
         final List<String> urls = videos.map<String>((video) {
-          return video['video_files'][1]
-              ['link']; // Assuming you want the first video file link
+          return video['video_files'][1]['link'];
         }).toList();
 
         reels.addAll(urls);
@@ -43,6 +42,7 @@ class ReelService {
 
   cacheVideos(String url, int i) async {
     FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+
     debugPrint(
         '================================= File info: ${fileInfo?.file.dirname}');
   }
