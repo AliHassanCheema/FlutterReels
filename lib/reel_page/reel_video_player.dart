@@ -31,11 +31,13 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
   bool _videoInitialized = false;
 
   initializeController() async {
+    debugPrint('=============================== reel url: ${widget.reelUrl}');
     var fileInfo = await kCacheManager.getFileFromCache(widget.reelUrl);
     if (fileInfo == null) {
       await kCacheManager.downloadFile(widget.reelUrl);
       fileInfo = await kCacheManager.getFileFromCache(widget.reelUrl);
     }
+
     if (mounted) {
       _controller = VideoPlayerController.file(fileInfo!.file)
         ..initialize().then((_) {
@@ -112,14 +114,16 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
               alignment: AlignmentDirectional.bottomEnd,
               children: [
                 !_videoInitialized
-                    // when the video is not initialized you can set a thumbnail.
-                    // to make it simple, I use CircularProgressIndicator
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: Colors.amber,
                         ),
                       )
-                    : VideoPlayer(_controller),
+                    : Center(
+                        child: AspectRatio(
+                            aspectRatio: _controller.value.aspectRatio,
+                            child: VideoPlayer(_controller)),
+                      ),
                 !_videoInitialized
                     ? const Center(
                         child: CircularProgressIndicator(
@@ -153,9 +157,6 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
               right: 16,
               bottom: 36,
               child: Column(children: widget.reelActions)),
-
-          // here you can add title, user Info,
-          // description, views count etc.
         ],
       ),
     );

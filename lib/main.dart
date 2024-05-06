@@ -26,7 +26,7 @@ class GetReelsWidget extends StatefulWidget {
 
 class _GetReelsWidgetState extends State<GetReelsWidget> {
   TextEditingController controller = TextEditingController();
-  Map<String, int> indexMap = {'index': 0};
+  int selectedIndex = 0;
   bool isBusy = false;
   bool isLiked = false;
   bool isReelsLoaded = false;
@@ -36,13 +36,17 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
     return Scaffold(
         body: isReelsLoaded
             ? VideoReelPage(
-                index: indexMap,
+                onGetIndex: (i) {
+                  setState(() {
+                    selectedIndex = i;
+                  });
+                },
                 reels: reels,
                 reelActions: [
                   GestureDetector(
                       onTap: () {
                         debugPrint(
-                            '===============================${indexMap['index']} Tapped');
+                            '===============================$selectedIndex Tapped');
                         isLiked = !isLiked;
                         setState(() {});
                       },

@@ -1,16 +1,18 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../config.dart';
 import 'reel_video_player.dart';
 
 class VideoReelPage extends StatefulWidget {
   const VideoReelPage(
       {super.key,
-      required this.index,
+      required this.onGetIndex,
       required this.reels,
       required this.reelActions});
-  final Map<String, int> index;
+  final Function(int i) onGetIndex;
   final List<String> reels;
   final List<Widget> reelActions;
 
@@ -25,7 +27,8 @@ class VideoReelPageState extends State<VideoReelPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.index['index']!);
+    onGetReels();
+    _pageController = PageController();
   }
 
   @override
@@ -43,7 +46,7 @@ class VideoReelPageState extends State<VideoReelPage> {
         controller: _pageController,
         itemCount: widget.reels.length,
         onPageChanged: (index) {
-          widget.index['index'] = index;
+          widget.onGetIndex(index);
           currentPage = index;
         },
         itemBuilder: (context, index) {
@@ -54,5 +57,23 @@ class VideoReelPageState extends State<VideoReelPage> {
         },
       ),
     );
+  }
+
+  cacheVideos(String url, int i) async {
+    FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+    if (fileInfo == null) {
+      debugPrint('downloading file ##------->$url##');
+      await kCacheManager.downloadFile(url);
+      debugPrint('downloaded file ##------->$url##');
+      if (i + 1 == widget.reels.length) {
+        debugPrint('caching finished');
+      }
+    }
+  }
+
+  onGetReels() {
+    for (var i = 0; i < widget.reels.length; i++) {
+      cacheVideos(widget.reels[i], i);
+    }
   }
 }
