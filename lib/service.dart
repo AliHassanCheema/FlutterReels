@@ -41,10 +41,19 @@ class ReelService {
   }
 
   cacheVideos(String url, int i) async {
-    FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+    // FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
 
-    debugPrint(
-        '================================= File info: ${fileInfo?.file.dirname}');
+    // debugPrint(
+    //     '================================= File info: ${fileInfo?.file.dirname}');
+    FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
+    if (fileInfo == null) {
+      debugPrint('downloading file ##------->$url##');
+      await kCacheManager.downloadFile(url);
+      debugPrint('downloaded file ##------->$url##');
+      if (i + 1 == reels.length) {
+        debugPrint('caching finished');
+      }
+    }
   }
 
   Future<List<String>> getReels(int page) async {

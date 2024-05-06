@@ -26,73 +26,93 @@ class GetReelsWidget extends StatefulWidget {
 
 class _GetReelsWidgetState extends State<GetReelsWidget> {
   TextEditingController controller = TextEditingController();
+  Map<String, int> indexMap = {'index': 0};
+  bool isBusy = false;
+  bool isLiked = false;
+  bool isReelsLoaded = false;
+  List<String> reels = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reels')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                keyboardType: TextInputType.phone,
-                controller: controller,
-                decoration: const InputDecoration(hintText: 'Page no.'),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    onGetreels();
-                  },
-                  child: const Text('Get Reels')),
-            ],
-          ),
-        ),
-      ),
-    );
+        body: isReelsLoaded
+            ? VideoReelPage(
+                index: indexMap,
+                reels: reels,
+                reelActions: [
+                  GestureDetector(
+                      onTap: () {
+                        debugPrint(
+                            '===============================${indexMap['index']} Tapped');
+                        isLiked = !isLiked;
+                        setState(() {});
+                      },
+                      child: Icon(
+                        Icons.thumb_up,
+                        color: isLiked ? Colors.blue : Colors.white,
+                        size: 36,
+                      )),
+                  const SizedBox(
+                    height: 28,
+                  ),
+                  const Icon(
+                    Icons.comment,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                  const SizedBox(
+                    height: 28,
+                  ),
+                  const Icon(
+                    Icons.share_sharp,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                ],
+              )
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextFormField(
+                        keyboardType: TextInputType.phone,
+                        controller: controller,
+                        decoration: const InputDecoration(hintText: 'Page no.'),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            onGetreels();
+                          },
+                          child: isBusy
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                  ))
+                              : const Text('Get Reels')),
+                    ],
+                  ),
+                ),
+              ));
   }
 
   onGetreels() async {
-    Map<String, int> index = {'index': 0};
-    final reels = await ReelService()
+    setState(() {
+      isBusy = true;
+    });
+    reels = await ReelService()
         .getReels(controller.text == '' ? 8 : int.parse(controller.text));
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return VideoReelPage(
-        index: index,
-        reels: reels,
-        reelActions: [
-          GestureDetector(
-              onTap: () {
-                debugPrint(
-                    '===============================${index['index']} Tapped');
-              },
-              child: const Icon(
-                Icons.thumb_up,
-                color: Colors.white,
-                size: 36,
-              )),
-          const SizedBox(
-            height: 28,
-          ),
-          const Icon(
-            Icons.comment,
-            color: Colors.white,
-            size: 36,
-          ),
-          const SizedBox(
-            height: 28,
-          ),
-          const Icon(
-            Icons.share_sharp,
-            color: Colors.white,
-            size: 36,
-          ),
-        ],
-      );
-    }));
+    if (reels.isNotEmpty) {
+      setState(() {
+        isReelsLoaded = true;
+        isBusy = false;
+      });
+    }
   }
 }
