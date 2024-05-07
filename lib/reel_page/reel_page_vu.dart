@@ -62,9 +62,9 @@ class VideoReelPageState extends State<VideoReelPage> {
   cacheVideos(String url, int i) async {
     FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
     if (fileInfo == null) {
-      debugPrint('downloading file ##------->$url##');
+      debugPrint('downloading file ##-------> $url ##');
       await kCacheManager.downloadFile(url);
-      debugPrint('downloaded file ##------->$url##');
+      debugPrint('downloaded file ##-------> $url ##');
       if (i + 1 == widget.reels.length) {
         debugPrint('caching finished');
       }

@@ -9,7 +9,7 @@ class ReelService {
     try {
       final response = await http.get(
         Uri.parse(
-            'https://api.pexels.com/videos/popular?per_page=20&page=$page'),
+            'https://api.pexels.com/videos/search?query=nature&per_page=20&page=$page'),
         headers: {
           'Authorization':
               'VdaQqOvvGYsJnanNW163T6npK5q6TJC8fWvmOv8Pn7oGditD4qREqg3A'

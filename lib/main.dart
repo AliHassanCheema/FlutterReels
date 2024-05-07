@@ -30,6 +30,7 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
   bool isBusy = false;
   bool isLiked = false;
   bool isReelsLoaded = false;
+  List<ReelConfig> reelConfigs = [];
   List<String> reels = [];
   @override
   Widget build(BuildContext context) {
@@ -41,18 +42,21 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
                     selectedIndex = i;
                   });
                 },
-                reels: reels,
+                reels: reelConfigs.map((e) => e.url).toList(),
                 reelActions: [
                   GestureDetector(
                       onTap: () {
                         debugPrint(
                             '===============================$selectedIndex Tapped');
-                        isLiked = !isLiked;
+                        reelConfigs[selectedIndex].isLiked =
+                            !reelConfigs[selectedIndex].isLiked;
                         setState(() {});
                       },
                       child: Icon(
                         Icons.thumb_up,
-                        color: isLiked ? Colors.blue : Colors.white,
+                        color: reelConfigs[selectedIndex].isLiked
+                            ? Colors.blue
+                            : Colors.white,
                         size: 36,
                       )),
                   const SizedBox(
@@ -107,11 +111,16 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
   }
 
   onGetreels() async {
+    reelConfigs.clear();
     setState(() {
       isBusy = true;
     });
     reels = await ReelService()
         .getReels(controller.text == '' ? 8 : int.parse(controller.text));
+    for (int i = 0; i < reels.length; i++) {
+      reelConfigs.add(ReelConfig(reels[i], false));
+    }
+
     if (reels.isNotEmpty) {
       setState(() {
         isReelsLoaded = true;
@@ -119,4 +128,11 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
       });
     }
   }
+}
+
+class ReelConfig {
+  String url;
+  bool isLiked;
+
+  ReelConfig(this.url, this.isLiked);
 }
