@@ -26,6 +26,7 @@ class GetReelsWidget extends StatefulWidget {
 
 class _GetReelsWidgetState extends State<GetReelsWidget> {
   TextEditingController controller = TextEditingController();
+  TextEditingController searchController = TextEditingController();
   int selectedIndex = 0;
   bool isBusy = false;
   bool isLiked = false;
@@ -70,10 +71,16 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
                   const SizedBox(
                     height: 28,
                   ),
-                  const Icon(
-                    Icons.share_sharp,
-                    color: Colors.white,
-                    size: 36,
+                  GestureDetector(
+                    onTap: () {
+                      isReelsLoaded = false;
+                      setState(() {});
+                    },
+                    child: const Icon(
+                      Icons.change_circle_outlined,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                 ],
               )
@@ -83,6 +90,14 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      TextFormField(
+                        controller: searchController,
+                        decoration:
+                            const InputDecoration(hintText: 'Write a topic'),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       TextFormField(
                         keyboardType: TextInputType.phone,
                         controller: controller,
@@ -115,8 +130,9 @@ class _GetReelsWidgetState extends State<GetReelsWidget> {
     setState(() {
       isBusy = true;
     });
-    reels = await ReelService()
-        .getReels(controller.text == '' ? 8 : int.parse(controller.text));
+    reels = await ReelService().getReels(
+        controller.text == '' ? 8 : int.parse(controller.text),
+        searchController.text);
     for (int i = 0; i < reels.length; i++) {
       reelConfigs.add(ReelConfig(reels[i], false));
     }
