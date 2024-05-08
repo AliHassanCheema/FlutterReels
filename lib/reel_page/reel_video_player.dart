@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:video_player/video_player.dart';
 
-import '../config.dart';
-
-class VideoPlayerWidget extends StatefulWidget {
+class ReelVideoPlayerWidget extends StatefulWidget {
   final String reelUrl;
   final List<Widget> reelActions;
 
-  const VideoPlayerWidget({
+  const ReelVideoPlayerWidget({
     super.key,
     required this.reelUrl,
     this.reelActions = const [],
   });
 
   @override
-  VideoPlayerWidgetState createState() => VideoPlayerWidgetState();
+  ReelVideoPlayerWidgetState createState() => ReelVideoPlayerWidgetState();
 }
 
-class VideoPlayerWidgetState extends State<VideoPlayerWidget>
+class ReelVideoPlayerWidgetState extends State<ReelVideoPlayerWidget>
     with WidgetsBindingObserver {
   late VideoPlayerController _controller;
 
@@ -31,30 +30,46 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
   bool _videoInitialized = false;
 
   initializeController() async {
-    debugPrint('=============================== reel url: ${widget.reelUrl}');
     var fileInfo = await kCacheManager.getFileFromCache(widget.reelUrl);
-    if (fileInfo == null) {
-      await kCacheManager.downloadFile(widget.reelUrl);
-      fileInfo = await kCacheManager.getFileFromCache(widget.reelUrl);
-    }
-
-    if (mounted) {
-      _controller = VideoPlayerController.file(fileInfo!.file)
-        ..initialize().then((_) {
-          setState(() {
-            _controller.setLooping(true); // Set video to loop
-            _controller.play();
-            _videoInitialized = true;
+    if (fileInfo != null) {
+      // await kCacheManager.downloadFile(widget.reelUrl);
+      // fileInfo = await kCacheManager.getFileFromCache(widget.reelUrl);
+      if (mounted) {
+        _controller = VideoPlayerController.file(fileInfo.file)
+          ..initialize().then((_) {
+            setState(() {
+              _controller.setLooping(true); // Set video to loop
+              _controller.play();
+              _videoInitialized = true;
+            });
           });
+        _controller.addListener(() {
+          if (_controller.value.isPlaying && !_isPlaying) {
+            // Video has started playing
+            setState(() {
+              _isPlaying = true;
+            });
+          }
         });
-      _controller.addListener(() {
-        if (_controller.value.isPlaying && !_isPlaying) {
-          // Video has started playing
-          setState(() {
-            _isPlaying = true;
+      }
+    } else {
+      if (mounted) {
+        _controller = VideoPlayerController.network(widget.reelUrl)
+          ..initialize().then((_) {
+            setState(() {
+              _controller.setLooping(true); // Set video to loop
+              _controller.play();
+              _videoInitialized = true;
+            });
           });
-        }
-      });
+        _controller.addListener(() {
+          if (_controller.value.isPlaying && !_isPlaying) {
+            setState(() {
+              _isPlaying = true;
+            });
+          }
+        });
+      }
     }
   }
 
@@ -115,9 +130,7 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
               children: [
                 !_videoInitialized
                     ? const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.amber,
-                        ),
+                        child: CircularProgressIndicator(),
                       )
                     : Center(
                         child: AspectRatio(
@@ -126,12 +139,10 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
                       ),
                 !_videoInitialized
                     ? const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.amber,
-                        ),
+                        child: CircularProgressIndicator(),
                       )
                     : const SizedBox(),
-                if (!_isPlaying)
+                if (!_isPlaying && _videoInitialized)
                   const Center(
                     child: Icon(
                       Icons.play_arrow,
@@ -145,7 +156,6 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
                         _controller,
                         allowScrubbing: true,
                         colors: const VideoProgressColors(
-                          playedColor: Colors.amber,
                           bufferedColor: Colors.grey,
                           backgroundColor: Colors.white,
                         ),
@@ -162,3 +172,14 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget>
     );
   }
 }
+
+const kReelCacheKey = "reelsCacheKey";
+final kCacheManager = CacheManager(
+  Config(
+    kReelCacheKey,
+    stalePeriod: const Duration(hours: 1), // Maximum cache duration
+    maxNrOfCacheObjects: 4, // maximum reels to cache
+    repo: JsonCacheInfoRepository(databaseName: kReelCacheKey),
+    fileService: HttpFileService(),
+  ),
+);

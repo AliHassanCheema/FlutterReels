@@ -29,28 +29,8 @@ class ReelService {
     } catch (error) {
       debugPrint('Error fetching data: $error');
     }
-    // for (var i = 0; i < reels.length; i++) {
-    //   cacheVideos(reels[i], i);
-    //   // you can add multiple logic for to cache videos. Right now I'm caching all videos
-    // }
     return reels;
   }
-
-  // cacheVideos(String url, int i) async {
-  //   // FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
-
-  //   // debugPrint(
-  //   //     '================================= File info: ${fileInfo?.file.dirname}');
-  //   FileInfo? fileInfo = await kCacheManager.getFileFromCache(url);
-  //   if (fileInfo == null) {
-  //     debugPrint('downloading file ##------->$url##');
-  //     await kCacheManager.downloadFile(url);
-  //     debugPrint('downloaded file ##------->$url##');
-  //     if (i + 1 == reels.length) {
-  //       debugPrint('caching finished');
-  //     }
-  //   }
-  // }
 
   Future<List<String>> getReels(int page, String topic) async {
     // reels.addAll([
